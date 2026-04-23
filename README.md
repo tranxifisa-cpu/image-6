@@ -19,7 +19,7 @@ This project is a Streamlit web app with real-time parameter tuning, before/afte
 ## Run Locally
 
 ```bash
-cd image5
+cd image-processor-6
 pip install -r requirements.txt
 streamlit run app.py
 ```
@@ -30,12 +30,12 @@ Then open the local URL shown by Streamlit (usually `http://localhost:8501`).
 
 Target platform: https://share.streamlit.io/
 
-1. Push this `image5` folder into a GitHub repository.
+1. Push this `image-processor-6` folder into a GitHub repository.
 2. Go to Streamlit Community Cloud and sign in with GitHub.
 3. Create a new app and set:
    - Repository: `<your-github-user>/<your-repo>`
    - Branch: usually `main`
-   - Main file path: `image5/app.py`
+   - Main file path: `image-processor-6/app.py`
 4. Click Deploy.
 
 Your public URL will be:
