@@ -23,7 +23,7 @@ from torchvision.models.detection import (
 from torchvision.models.segmentation import FCN_ResNet50_Weights, fcn_resnet50
 
 st.set_page_config(
-    page_title="Image Processor - FCN / R-CNN Family / Mask R-CNN",
+    page_title="作业六：FCN / R-CNN 家族 / Mask R-CNN",
     page_icon="🧠",
     layout="wide",
 )
@@ -121,13 +121,13 @@ def safe_category_name(label_idx: int, categories: Sequence[str]) -> str:
 
 def load_uploaded_or_url_image() -> Optional[Image.Image]:
     uploaded = st.sidebar.file_uploader(
-        "Upload an image",
+        "上传图像",
         type=["png", "jpg", "jpeg", "webp", "bmp"],
-        help="For best visual quality, use a photo with objects and scenes.",
+        help="建议使用包含物体和场景的照片，便于观察检测与分割效果。",
     )
 
     url_value = st.sidebar.text_input(
-        "Or load image from URL",
+        "或通过 URL 加载图像",
         value="",
         placeholder="https://example.com/demo.jpg",
     )
@@ -141,7 +141,7 @@ def load_uploaded_or_url_image() -> Optional[Image.Image]:
                 data = response.read()
             return Image.open(io.BytesIO(data)).convert("RGB")
         except (URLError, ValueError, OSError):
-            st.sidebar.error("Failed to load image from URL.")
+            st.sidebar.error("无法从 URL 加载图像。")
 
     return None
 
@@ -555,65 +555,65 @@ def benchmark_selected_methods(
 def render_image_pair(before: Image.Image, after: Image.Image):
     c1, c2 = st.columns(2)
     with c1:
-        st.image(before, caption="Before", use_container_width=True)
+        st.image(before, caption="处理前", use_container_width=True)
     with c2:
-        st.image(after, caption="After", use_container_width=True)
+        st.image(after, caption="处理后", use_container_width=True)
 
 
 def render_stats(stats: Dict[str, float], include_proposals: bool = False):
     cols = st.columns(3)
-    cols[0].metric("Latency (ms)", f"{stats.get('latency_ms', 0.0):.2f}")
+    cols[0].metric("延迟 (ms)", f"{stats.get('latency_ms', 0.0):.2f}")
     cols[1].metric("FPS", f"{(1000.0 / stats.get('latency_ms', 1.0)):.2f}")
-    cols[2].metric("Objects / classes", f"{stats.get('detections', stats.get('detected_classes', 0.0)):.0f}")
+    cols[2].metric("检测目标/类别数", f"{stats.get('detections', stats.get('detected_classes', 0.0)):.0f}")
 
     if include_proposals:
         st.caption(f"R-CNN proposal budget used: {int(stats.get('proposals', 0.0))}")
 
 
-st.title("Interactive Image Processor with FCN / R-CNN Family / Mask R-CNN")
+st.title("作业六：FCN / R-CNN 家族 / Mask R-CNN 交互演示")
 st.caption(
-    "Real-time parameter tuning with before/after comparison. "
-    "R-CNN and Fast R-CNN are educational demos; Faster R-CNN and Mask R-CNN use official pretrained models from torchvision."
+    "实时参数调节，前后效果对比。"
+    "R-CNN 与 Fast R-CNN 为教学演示；Faster R-CNN 与 Mask R-CNN 使用 torchvision 官方预训练模型。"
 )
 
-st.sidebar.header("Global Controls")
+st.sidebar.header("全局控制")
 mode = st.sidebar.selectbox(
-    "Select module",
+    "选择模块",
     options=[
-        "1) FCN Semantic Segmentation",
+        "1) FCN 语义分割",
         "2) R-CNN / Fast R-CNN / Faster R-CNN",
-        "3) Mask R-CNN Instance Segmentation",
-        "4) Performance Comparison",
+        "3) Mask R-CNN 实例分割",
+        "4) 性能对比",
     ],
 )
 
-score_threshold = st.sidebar.slider("Score threshold", 0.05, 0.95, 0.50, 0.05)
-mask_threshold = st.sidebar.slider("Mask threshold", 0.10, 0.95, 0.50, 0.05)
-alpha = st.sidebar.slider("Overlay alpha", 0.10, 0.90, 0.45, 0.05)
-max_detections = st.sidebar.slider("Max detections", 1, 100, 25, 1)
+score_threshold = st.sidebar.slider("置信度阈值", 0.05, 0.95, 0.50, 0.05)
+mask_threshold = st.sidebar.slider("掩码阈值", 0.10, 0.95, 0.50, 0.05)
+alpha = st.sidebar.slider("叠加透明度", 0.10, 0.90, 0.45, 0.05)
+max_detections = st.sidebar.slider("最大检测数", 1, 100, 25, 1)
 
 image = load_uploaded_or_url_image()
 
 st.sidebar.markdown("---")
-st.sidebar.write(f"Device: **{DEVICE.type.upper()}**")
-st.sidebar.write("Tip: on CPU, first inference can be slow because models are downloaded and warmed up.")
+st.sidebar.write(f"计算设备：**{DEVICE.type.upper()}**")
+st.sidebar.write("提示：CPU 上首次推理较慢，因为需要下载并预热模型。")
 
 if image is None:
-    st.info("Upload an image or provide a URL to start the demo.")
+    st.info("请上传图像或提供 URL 以开始演示。")
     st.stop()
 
-if mode == "1) FCN Semantic Segmentation":
-    st.subheader("FCN Semantic Segmentation")
+if mode == "1) FCN 语义分割":
+    st.subheader("FCN 语义分割")
     categories = FCN_ResNet50_Weights.DEFAULT.meta.get("categories", [])
     selectable_classes = [c for i, c in enumerate(categories) if i != 0]
 
     selected_classes = st.multiselect(
-        "Optional class focus (leave empty to show all detected classes)",
+        "可选类别筛选（留空显示全部检测到的类别）",
         options=selectable_classes,
         default=[],
     )
 
-    with st.spinner("Running FCN segmentation..."):
+    with st.spinner("正在运行 FCN 语义分割..."):
         result_image, stats, class_summary = run_fcn(
             image,
             alpha=alpha,
@@ -626,20 +626,20 @@ if mode == "1) FCN Semantic Segmentation":
     if not class_summary.empty:
         st.dataframe(class_summary, use_container_width=True)
     else:
-        st.warning("No foreground classes found for the selected filter.")
+        st.warning("当前筛选条件下未找到前景类别。")
 
 elif mode == "2) R-CNN / Fast R-CNN / Faster R-CNN":
-    st.subheader("R-CNN Family Object Detection")
+    st.subheader("R-CNN 家族目标检测")
     variant = st.radio(
-        "Detector variant",
+        "检测器变体",
         options=["R-CNN Demo", "Fast R-CNN Proxy", "Faster R-CNN"],
         horizontal=True,
     )
 
-    rcnn_proposal_threshold = st.slider("R-CNN proposal threshold", 0.01, 0.60, 0.10, 0.01)
-    rcnn_proposal_budget = st.slider("R-CNN proposal budget", 4, 96, 20, 2)
+    rcnn_proposal_threshold = st.slider("R-CNN 候选框阈值", 0.01, 0.60, 0.10, 0.01)
+    rcnn_proposal_budget = st.slider("R-CNN 候选框预算", 4, 96, 20, 2)
 
-    with st.spinner(f"Running {variant}..."):
+    with st.spinner(f"正在运行 {variant}..."):
         if variant == "R-CNN Demo":
             result_image, stats = run_rcnn_demo(
                 image,
@@ -668,14 +668,14 @@ elif mode == "2) R-CNN / Fast R-CNN / Faster R-CNN":
     render_stats(stats, include_proposals=(variant == "R-CNN Demo"))
 
     st.markdown(
-        "**Note**: R-CNN and Fast R-CNN are simplified educational implementations in this app. "
-        "Faster R-CNN uses the official torchvision pretrained detector."
+        "**说明**：R-CNN 与 Fast R-CNN 为本应用中的简化教学实现。"
+        "Faster R-CNN 使用 torchvision 官方预训练检测器。"
     )
 
-elif mode == "3) Mask R-CNN Instance Segmentation":
-    st.subheader("Mask R-CNN Instance Segmentation")
+elif mode == "3) Mask R-CNN 实例分割":
+    st.subheader("Mask R-CNN 实例分割")
 
-    with st.spinner("Running Mask R-CNN..."):
+    with st.spinner("正在运行 Mask R-CNN..."):
         result_image, stats = run_mask_rcnn(
             image,
             score_threshold=score_threshold,
@@ -688,24 +688,24 @@ elif mode == "3) Mask R-CNN Instance Segmentation":
     render_stats(stats)
 
 else:
-    st.subheader("Performance Comparison")
+    st.subheader("性能对比")
     st.write(
-        "Compare local runtime under current settings and reference paper-level numbers. "
-        "For CPU environments, keep runs low to reduce waiting time."
+        "在当前参数设置下对比本地推理耗时，并参考论文级别的指标数据。"
+        "CPU 环境下建议减少运行次数以降低等待时间。"
     )
 
-    rcnn_proposal_threshold = st.slider("Benchmark R-CNN proposal threshold", 0.01, 0.60, 0.10, 0.01)
-    rcnn_proposal_budget = st.slider("Benchmark R-CNN proposal budget", 4, 96, 20, 2)
+    rcnn_proposal_threshold = st.slider("基准测试 R-CNN 候选框阈值", 0.01, 0.60, 0.10, 0.01)
+    rcnn_proposal_budget = st.slider("基准测试 R-CNN 候选框预算", 4, 96, 20, 2)
 
     methods = st.multiselect(
-        "Methods to benchmark",
+        "选择要测试的方法",
         options=["FCN", "R-CNN Demo", "Fast R-CNN Proxy", "Faster R-CNN", "Mask R-CNN"],
         default=["FCN", "R-CNN Demo", "Fast R-CNN Proxy", "Faster R-CNN", "Mask R-CNN"],
     )
-    runs = st.slider("Benchmark runs per method", 1, 3, 1, 1)
+    runs = st.slider("每种方法测试次数", 1, 3, 1, 1)
 
-    if st.button("Run benchmark", type="primary"):
-        with st.spinner("Benchmarking selected methods..."):
+    if st.button("运行基准测试", type="primary"):
+        with st.spinner("正在测试所选方法..."):
             table = benchmark_selected_methods(
                 image=image,
                 methods=methods,
@@ -719,7 +719,7 @@ else:
             )
 
         if table.empty:
-            st.warning("No benchmark result available. Please select at least one method.")
+            st.warning("未获得测试结果，请至少选择一种方法。")
         else:
             st.dataframe(table, use_container_width=True)
 
@@ -736,11 +736,11 @@ else:
             )
             st.altair_chart(chart, use_container_width=True)
 
-    st.markdown("### Reference numbers from literature (non-local runtime)")
+    st.markdown("### 论文参考指标（非本地实测）")
     st.table(pd.DataFrame(REFERENCE_METRICS))
 
 st.markdown("---")
 st.caption(
-    "Deployment target: Streamlit Community Cloud (https://share.streamlit.io). "
-    "Push this folder to GitHub and deploy app.py as the entrypoint."
+    "部署目标：Streamlit Community Cloud（https://share.streamlit.io）。"
+    "将本文件夹推送至 GitHub，以 app.py 为入口部署。"
 )
